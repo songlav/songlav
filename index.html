@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СОНГЛАВ — Музыкальная платформа</title>
+<style>
+:root{--bg-dark:#12141a;--bg-panel:#1c1f2b;--bg-card:#232736;--accent:#5b6cff;--accent-hover:#4a5ae0;--text:#ffffff;--text-sec:#8b92a5;--border:#2e3345;--green:#2ecc71;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+body{background:var(--bg-dark);color:var(--text);display:flex;justify-content:center;min-height:100vh;}
+.app{width:100%;max-width:480px;min-height:100vh;position:relative;padding-bottom:90px;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:var(--bg-dark);position:sticky;top:0;z-index:10;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:1px;}
+.logo span{color:var(--accent);font-size:26px;}
+.page{padding:0 20px;display:none;}
+.page.active{display:block;}
+h1{font-size:24px;margin-bottom:5px;}
+.subtitle{color:var(--text-sec);font-size:13px;margin-bottom:20px;}
+
+/* ЭКРАН АВТОРИЗАЦИИ */
+.auth-wrap{padding:30px 20px;display:flex;flex-direction:column;justify-content:center;min-height:100vh;}
+.auth-logo{font-size:36px;font-weight:800;color:var(--accent);text-align:center;margin-bottom:8px;letter-spacing:2px;}
+.auth-tag{text-align:center;color:var(--text-sec);font-size:13px;margin-bottom:20px;letter-spacing:1px;}
+.auth-welcome{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:22px;font-size:13px;color:var(--text-sec);line-height:1.55;text-align:center;}
+.auth-welcome .hello{font-size:16px;color:var(--text);margin-bottom:8px;font-weight:700;}
+.auth-welcome p{margin-bottom:0;}
+.auth-welcome .accent{color:var(--accent);font-weight:600;}
+.auth-form{background:var(--bg-panel);padding:26px 22px;border-radius:18px;border:1px solid var(--border);}
+.auth-form h2{margin-bottom:22px;font-size:20px;text-align:center;}
+.form-group{margin-bottom:15px;}
+.form-group label{display:block;font-size:13px;color:var(--text-sec);margin-bottom:6px;}
+.form-group input,.form-group select{width:100%;padding:13px;border-radius:10px;border:1px solid var(--border);background:var(--bg-dark);color:var(--text);font-size:14px;outline:none;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+.btn{background:var(--accent);color:white;border:none;padding:14px 20px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:0.2s;}
+.btn:hover{background:var(--accent-hover);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-small{width:auto;padding:10px 16px;font-size:13px;border-radius:20px;}
+.switch-link{text-align:center;margin-top:18px;font-size:13px;color:var(--text-sec);}
+.switch-link span{color:var(--accent);cursor:pointer;font-weight:600;}
+
+/* Форма загрузки */
+.file-upload{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:25px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;background:var(--bg-dark);text-align:center;margin-bottom:15px;transition:0.2s;}
+.file-upload:hover{border-color:var(--accent);}
+.file-upload .icon{font-size:32px;margin-bottom:8px;}
+.file-upload .text{font-size:14px;color:var(--text-sec);word-break:break-all;}
+.file-upload input{display:none;}
+.cover-preview{width:100%;height:160px;border-radius:12px;background:var(--bg-dark);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:15px;cursor:pointer;}
+.cover-preview img{width:100%;height:100%;object-fit:cover;}
+
+/* Треки */
+.track-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-panel);border-radius:12px;margin-bottom:10px;border:1px solid var(--border);}
+.track-cover{width:52px;height:52px;border-radius:10px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0;}
+.track-cover img{width:100%;height:100%;object-fit:cover;}
+.track-info{flex:1;min-width:0;}
+.track-info h3{font-size:15px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.track-info p{font-size:12px;color:var(--text-sec);}
+.track-info .genre{display:inline-block;background:rgba(91,108,255,0.15);color:var(--accent);padding:2px 8px;border-radius:8px;font-size:10px;margin-top:3px;}
+.track-social{font-size:11px;color:var(--accent);text-decoration:none;display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.track-owner{font-size:10px;color:var(--text-sec);margin-top:3px;}
+.views-badge{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-sec);background:var(--bg-dark);padding:5px 9px;border-radius:20px;border:1px solid var(--border);flex-shrink:0;}
+.views-badge .eye{font-size:14px;}
+.views-badge .count{color:var(--text);font-weight:600;}
+
+/* Аналитика */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;}
+.stat-card{background:var(--bg-panel);border-radius:16px;padding:18px;border:1px solid var(--border);}
+.stat-card .label{font-size:12px;color:var(--text-sec);margin-bottom:5px;}
+.stat-card .value{font-size:26px;font-weight:700;}
+.stat-card .sub{font-size:11px;color:var(--text-sec);margin-top:4px;}
+.card{background:var(--bg-panel);border-radius:16px;padding:20px;margin-bottom:15px;border:1px solid var(--border);}
+.card-header{font-size:14px;color:var(--text-sec);margin-bottom:12px;}
+
+/* Меню */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg-panel);display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid var(--border);z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text-sec);font-size:10px;padding:5px 8px;cursor:pointer;background:none;border:none;}
+.nav-item.active{color:var(--accent);}
+.nav-item svg{width:24px;height:24px;fill:currentColor;}
+
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:14px 24px;border-radius:10px;font-size:14px;z-index:200;opacity:0;transition:0.3s;pointer-events:none;text-align:center;max-width:90%;}
+.toast.show{opacity:1;}
+.toast.error{background:#e74c3c;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-sec);}
+.empty-state .icon{font-size:48px;margin-bottom:15px;opacity:0.5;}
+</style>
+</head>
+<body>
+<div class="app">
+
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
+    <div id="auth-screen" class="auth-wrap">
+        <div class="auth-logo">СОНГЛАВ</div>
+        <div class="auth-tag">МУЗЫКАЛЬНАЯ ПЛАТФОРМА</div>
+
+        <div class="auth-welcome">
+            <div class="hello">Привет! 👋</div>
+            <p><span class="accent">СОНГЛАВ</span> — это музыкальная платформа, где ты можешь продемонстрировать свои треки, а другие пользователи нашей платформы их послушают!</p>
+        </div>
+
+        <div id="login-form" class="auth-form">
+            <h2>Вход</h2>
+            <div class="form-group"><label>Логин</label><input type="text" id="login-user" placeholder="Введите логин"></div>
+            <div class="form-group"><label>Пароль</label><input type="password" id="login-pass" placeholder="Введите пароль"></div>
+            <button class="btn" onclick="doLogin()">Войти</button>
+            <div class="switch-link">Нет аккаунта? <span onclick="switchAuth('register')">Зарегистрироваться</span></div>
+        </div>
+
+        <div id="register-form" class="auth-form" style="display:none;">
+            <h2>Регистрация</h2>
+            <div class="form-group"><label>Логин</label><input type="text" id="reg-user" placeholder="Придумайте логин"></div>
+            <div class="form-group"><label>Пароль</label><input type="password" id="reg-pass" placeholder="Придумайте пароль"></div>
+            <div class="form-group"><label>Подтвердите пароль</label><input type="password" id="reg-pass2" placeholder="Повторите пароль"></div>
+            <button class="btn" onclick="doRegister()">Создать аккаунт</button>
+            <div class="switch-link">Уже есть аккаунт? <span onclick="switchAuth('login')">Войти</span></div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+    <div id="main-app" style="display:none;">
+        <header class="header">
+            <div class="logo"><span>♪</span> СОНГЛАВ</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span style="font-size:12px;color:var(--text-sec);" id="current-user"></span>
+                <button class="btn-small btn-outline" onclick="logout()">Выйти</button>
+            </div>
+        </header>
+
+        <!-- ЛЕНТА -->
+        <div id="page-feed" class="page active">
+            <h1>Лента треков</h1>
+            <p class="subtitle">Слушайте, что загружают другие</p>
+            <div id="feed-list"></div>
+        </div>
+
+        <!-- ЗАГРУЗИТЬ -->
+        <div id="page-upload" class="page">
+            <h1>Загрузить трек</h1>
+            <p class="subtitle">Выберите аудиофайл и заполните информацию</p>
+
+            <div class="file-upload" onclick="document.getElementById('audio-input').click()">
+                <div class="icon">🎵</div>
+                <div class="text" id="audio-label">Нажмите, чтобы выбрать аудиофайл</div>
+                <input type="file" id="audio-input" accept="audio/*" onchange="handleAudio(this)">
+            </div>
+
+            <div class="cover-preview" id="cover-preview" onclick="document.getElementById('cover-input').click()">
+                <div style="text-align:center;">
+                    <div style="font-size:32px;">🖼️</div>
+                    <div style="font-size:12px;color:var(--text-sec);margin-top:5px;">Добавить обложку</div>
+                </div>
+                <input type="file" id="cover-input" accept="image/*" onchange="handleCover(this)">
+            </div>
+
+            <div class="form-group"><label>Название трека *</label><input type="text" id="track-title" placeholder="Введите название"></div>
+            <div class="form-group">
+                <label>Жанр</label>
+                <select id="track-genre">
+                    <option value="">Выберите жанр</option>
+                    <option>Pop</option><option>Hip-Hop</option><option>Rock</option>
+                    <option>Electronic</option><option>R&B</option><option>Jazz</option>
+                    <option>Classical</option><option>Другое</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Исполнитель *</label><input type="text" id="track-artist" placeholder="Имя исполнителя"></div>
+            <div class="form-group"><label>Ссылка на соцсеть (необязательно)</label><input type="url" id="track-social" placeholder="https://instagram.com/..."></div>
+            <button class="btn" id="upload-btn" onclick="saveTrack()">⬆️ Загрузить трек</button>
+        </div>
+
+        <!-- МОИ ТРЕКИ -->
+        <div id="page-tracks" class="page">
+            <h1>Мои треки</h1>
+            <p class="subtitle">Ваши композиции</p>
+            <div id="tracks-list"></div>
+        </div>
+
+        <!-- АНАЛИТИКА -->
+        <div id="page-analytics" class="page">
+            <h1>Аналитика</h1>
+            <p class="subtitle">Статистика ваших треков</p>
+            <div class="stat-grid">
+                <div class="stat-card"><div class="label">Всего треков</div><div class="value" id="stat-total">0</div><div class="sub">Загружено вами</div></div>
+                <div class="stat-card"><div class="label">Прослушивания</div><div class="value" id="stat-views">0</div><div class="sub">Всего</div></div>
+            </div>
+            <div class="card">
+                <div class="card-header">Топ треков</div>
+                <div id="top-tracks" style="color:var(--text-sec);font-size:13px;">Пока нет данных</div>
+            </div>
+        </div>
+
+        <!-- МЕНЮ -->
+        <nav class="nav">
+            <button class="nav-item" onclick="switchPage('feed', this)">
+                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>Лента
+            </button>
+            <button class="nav-item active" onclick="switchPage('upload', this)">
+                <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>Загрузить
+            </button>
+            <button class="nav-item" onclick="switchPage('tracks', this)">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"/></svg>Мои треки
+            </button>
+            <button class="nav-item" onclick="switchPage('analytics', this)">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-5h2v5zm4 0h-2v-7h2v7zm4 0h-2v-9h2v9z"/></svg>Аналитика
+            </button>
+        </nav>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let users = JSON.parse(localStorage.getItem('songlav_users') || '{}');
+let currentUser = localStorage.getItem('songlav_current') || null;
+let tracks = JSON.parse(localStorage.getItem('songlav_tracks') || '[]');
+let isSaving = false;
+
+if (tracks.length === 0) {
+    tracks = [
+        { id: 1001, title: 'Ночной город', artist: 'MC Flow', genre: 'Hip-Hop', social: '', cover: '', owner: 'demo_user1', views: 1240, date: '12.10.2026' },
+        { id: 1002, title: 'Летний дождь', artist: 'Anna V', genre: 'Pop', social: '', cover: '', owner: 'demo_user2', views: 876, date: '11.10.2026' },
+        { id: 1003, title: 'Deep Space', artist: 'DJ Nova', genre: 'Electronic', social: '', cover: '', owner: 'demo_user3', views: 2340, date: '10.10.2026' },
+    ];
+    localStorage.setItem('songlav_tracks', JSON.stringify(tracks));
+}
+
+function switchAuth(type) {
+    document.getElementById('login-form').style.display = type === 'register' ? 'none' : 'block';
+    document.getElementById('register-form').style.display = type === 'register' ? 'block' : 'none';
+}
+function doLogin() {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    if (!u || !p) return showToast('Заполните все поля', true);
+    if (!users[u]) return showToast('Пользователь не найден', true);
+    if (users[u] !== p) return showToast('Неверный пароль', true);
+    currentUser = u; localStorage.setItem('songlav_current', u); enterApp();
+}
+function doRegister() {
+    const u = document.getElementById('reg-user').value.trim();
+    const p = document.getElementById('reg-pass').value;
+    const p2 = document.getElementById('reg-pass2').value;
+    if (!u || !p) return showToast('Заполните все поля', true);
+    if (p !== p2) return showToast('Пароли не совпадают', true);
+    if (users[u]) return showToast('Такой логин уже есть', true);
+    users[u] = p; localStorage.setItem('songlav_users', JSON.stringify(users));
+    currentUser = u; localStorage.setItem('songlav_current', u);
+    showToast('✅ Аккаунт создан!');
+    setTimeout(enterApp, 600);
+}
+function enterApp() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('current-user').textContent = '@' + currentUser;
+    renderFeed(); renderTracks(); renderAnalytics();
+}
+function logout() {
+    currentUser = null; localStorage.removeItem('songlav_current');
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+}
+
+function switchPage(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (page === 'feed') renderFeed();
+    if (page === 'tracks') renderTracks();
+    if (page === 'analytics') renderAnalytics();
+}
+
+function showToast(msg, isError) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 2500);
+}
+
+function handleAudio(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById('audio-label').textContent = '✅ ' + input.files[0].name;
+    }
+}
+function handleCover(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('cover-preview');
+            preview.innerHTML = '<img src="' + e.target.result + '">';
+            preview.dataset.image = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function saveTrack() {
+    if (isSaving) return;
+    isSaving = true;
+    document.getElementById('upload-btn').textContent = '⏳ Сохранение...';
+
+    const title = document.getElementById('track-title').value.trim();
+    const artist = document.getElementById('track-artist').value.trim();
+    const genre = document.getElementById('track-genre').value;
+    const social = document.getElementById('track-social').value.trim();
+    const audioInput = document.getElementById('audio-input');
+    const coverPreview = document.getElementById('cover-preview');
+    const coverImage = coverPreview.dataset.image || '';
+
+    if (!title) { isSaving = false; document.getElementById('upload-btn').textContent = '⬆️ Загрузить трек'; return showToast('Введите название трека', true); }
+    if (!artist) { isSaving = false; document.getElementById('upload-btn').textContent = '⬆️ Загрузить трек'; return showToast('Введите исполнителя', true); }
+    if (!audioInput.files || !audioInput.files[0]) { isSaving = false; document.getElementById('upload-btn').textContent = '⬆️ Загрузить трек'; return showToast('Выберите аудиофайл', true); }
+
+    const exists = tracks.find(t => t.title === title && t.artist === artist && t.owner === currentUser);
+    if (exists) {
+        isSaving = false; document.getElementById('upload-btn').textContent = '⬆️ Загрузить трек';
+        return showToast('Такой трек уже есть у вас', true);
+    }
+
+    const track = {
+        id: Date.now(), title, artist,
+        genre: genre || 'Не указан', social, cover: coverImage,
+        audioName: audioInput.files[0].name,
+        owner: currentUser, views: 0,
+        date: new Date().toLocaleDateString('ru-RU')
+    };
+
+    tracks.push(track);
+    try { localStorage.setItem('songlav_tracks', JSON.stringify(tracks)); }
+    catch (e) { track.cover = ''; localStorage.setItem('songlav_tracks', JSON.stringify(tracks)); }
+
+    document.getElementById('track-title').value = '';
+    document.getElementById('track-artist').value = '';
+    document.getElementById('track-genre').value = '';
+    document.getElementById('track-social').value = '';
+    document.getElementById('audio-input').value = '';
+    document.getElementById('cover-input').value = '';
+    document.getElementById('audio-label').textContent = 'Нажмите, чтобы выбрать аудиофайл';
+    coverPreview.innerHTML = '<div style="text-align:center;"><div style="font-size:32px;">🖼️</div><div style="font-size:12px;color:var(--text-sec);margin-top:5px;">Добавить обложку</div></div>';
+    delete coverPreview.dataset.image;
+
+    document.getElementById('upload-btn').textContent = '✅ Трек загружен!';
+    showToast('✅ Трек успешно загружен!');
+    renderFeed(); renderTracks(); renderAnalytics();
+
+    setTimeout(() => {
+        document.getElementById('upload-btn').textContent = '⬆️ Загрузить трек';
+        isSaving = false;
+    }, 2000);
+}
+
+function renderFeed() {
+    const list = document.getElementById('feed-list');
+    if (tracks.length === 0) { list.innerHTML = '<div class="empty-state"><div class="icon">🎵</div><div>Пока нет треков</div></div>'; return; }
+    const sorted = [...tracks].sort((a, b) => b.id - a.id);
+    list.innerHTML = sorted.map(t => `
+        <div class="track-item">
+            <div class="track-cover">${t.cover ? '<img src="' + t.cover + '">' : '🎵'}</div>
+            <div class="track-info">
+                <h3>${t.title}</h3>
+                <p>${t.artist}</p>
+                <span class="genre">${t.genre}</span>
+                <div class="track-owner">👤 @${t.owner || 'аноним'}</div>
+                ${t.social ? '<a href="' + t.social + '" target="_blank" class="track-social">🔗 Соцсеть</a>' : ''}
+            </div>
+            <div class="views-badge"><span class="eye">👁</span><span class="count">${t.views || 0}</span></div>
+        </div>`).join('');
+}
+
+function renderTracks() {
+    const list = document.getElementById('tracks-list');
+    const mine = tracks.filter(t => t.owner === currentUser);
+    if (mine.length === 0) { list.innerHTML = '<div class="empty-state"><div class="icon">🎵</div><div>У вас пока нет треков</div></div>'; return; }
+    list.innerHTML = mine.map(t => `
+        <div class="track-item">
+            <div class="track-cover">${t.cover ? '<img src="' + t.cover + '">' : '🎵'}</div>
+            <div class="track-info">
+                <h3>${t.title}</h3>
+                <p>${t.artist}</p>
+                <span class="genre">${t.genre}</span>
+                ${t.social ? '<a href="' + t.social + '" target="_blank" class="track-social">🔗 Соцсеть</a>' : ''}
+            </div>
+            <div class="views-badge" title="Прослушивания"><span class="eye">👁</span><span class="count">${t.views || 0}</span></div>
+        </div>`).join('');
+}
+
+function renderAnalytics() {
+    const mine = tracks.filter(t => t.owner === currentUser);
+    const totalViews = mine.reduce((sum, t) => sum + (t.views || 0), 0);
+    document.getElementById('stat-total').textContent = mine.length;
+    document.getElementById('stat-views').textContent = totalViews;
+    const top = [...mine].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+    const topEl = document.getElementById('top-tracks');
+    topEl.innerHTML = top.length === 0 ? 'Пока нет данных' :
+        top.map(t => `<div style="display:flex;justify-content:space-between;padding:6px 0;"><span>${t.title}</span><span style="color:var(--accent);">👁 ${t.views || 0}</span></div>`).join('');
+}
+
+if (currentUser && users[currentUser]) enterApp();
+</script>
+</body>
+</html>
